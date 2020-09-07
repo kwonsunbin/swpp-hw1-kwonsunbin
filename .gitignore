@@ -1,2 +1,4 @@
 compare.py
-__pyache__
+__pycache__
+.gitignore
+.DS_Store
