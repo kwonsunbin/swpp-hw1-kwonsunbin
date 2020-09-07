@@ -17,8 +17,9 @@ from babyname_parser import BabynameParser
 """
 Parse html files where the popular baby names are listed for each year,
 collect records and save them into "babydata/" as a csv format.
-The name of the output CSV file is "output.csv".
+The name of the output CSV file is "babyname.report.csv".
 """
+
 
 class BabyRecord:
     def __init__(self, year, rank, name, gender, rank_change=None):
@@ -35,18 +36,32 @@ class BabyRecord:
         self.name = name
         self.gender = gender
         self.rank_change = rank_change
-    
+
+    def update_rc(self, rc):
+        self.rank_change = rc
+
+    def get_gender(self):
+        return self.gender
+
+    def get_name(self):
+        return self.name
+
+    def get_rank(self):
+        return self.rank
+
     def to_csv_record(self):
         """
         (1 point)
         Convert the record into a comma-seperated string line, as format of "year,rank,name,gender(M/F),rank_change".
         The return value is a line of body of CSV file output.
         If rank_change is None, save it as blank ("").
-
         e.g. 2018,1,Joan,F,-2
         """
         # TODO: Implment this function
-
+        csvLine = str(self.year) + ',' + str(self.rank) + \
+            ',' + str(self.name) + ',' + str(self.gender) + \
+            ','+str(self.rank_change)
+        return csvLine
 
     def __repr__(self):
         """
@@ -60,11 +75,11 @@ class BabyRecord:
             self.rank_change,
         )
 
+
 def save(filename, records):
     """
     NOTE: DO NOT change this function.
     This function saves the parsed records in csv format.
-
     Args:
         filename: The name of the output file.
         records: The list of records.
@@ -88,8 +103,8 @@ def main():
 
     year1, year2 = int(args[0]), int(args[1])
 
-    records = [] # list of BabyRecord objects
-    prev_male_ranking = {} # use this to calculate the rank if you need
+    records = []  # list of BabyRecord objects
+    prev_male_ranking = {}  # use this to calculate the rank if you need
     prev_female_ranking = {}
 
     for year in range(year1, year2 + 1):
@@ -98,19 +113,43 @@ def main():
         # TODO: In the following two lines, change `None` to your lambda function to parse baby name records.
         # By using the lambda function, `parse` method should return a list of `BabyRecord` objects
         # that contain year, rank, name, and gender data.
-        male_records = parser.parse(None) # Parse the male ranks and store them as a list of `BabyRecord` objects.
-        female_records = parser.parse(None) # Parse the female ranks and store it as a list of `BabyRecord` objects.
-        
+        male_records = parser.parse(lambda year, rank, name: BabyRecord(
+            year, rank, name, "M", ""))  # Parse the male ranks and store them as a list of `BabyRecord` objects.
+        female_records = parser.parse(lambda year, rank, name: BabyRecord(
+            year, rank, name, "F", ""))  # Parse the female ranks and store it as a list of `BabyRecord` objects.
+
         # TODO: Calculate the rank change for each of `male_records` and `female_records`.
         # For example, if the rank of the previous year is 8 and the rank of the current year is 5,
         # -3 is the rank change. (Beware the sign of the value. Rank-up is respresented with a negative value!)
         # If the rank of previous year is not available, set `rank_change` to `None`.
+        for record in male_records:
+            if record.get_name() in prev_male_ranking.keys():
+                record.update_rc(record.get_rank() -
+                                 prev_male_ranking[record.get_name()])
+
+        for record in female_records:
+            if record.get_name() in prev_female_ranking.keys():
+                record.update_rc(record.get_rank() -
+                                 prev_female_ranking[record.get_name()])
+
+        records.extend(male_records)
+        records.extend(female_records)
+
+        prev_male_ranking = {}
+        prev_female_ranking = {}
+
+        for record in male_records:
+            prev_male_ranking[record.get_name()] = record.get_rank()
+
+        for record in female_records:
+            prev_female_ranking[record.get_name()] = record.get_rank()
 
     # TODO: Save the result as a csv file named `babyname.report.csv` under `babydata/` directory.
     # The example output of `babyname.report.csv` is provided in `babydata/` folder.
     # You should make the same result with the example file.
 
     save(os.path.join("babydata", "babyname.report.csv"), records)
+
 
 if __name__ == '__main__':
     main()
