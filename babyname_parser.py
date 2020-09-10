@@ -26,12 +26,10 @@ Implement the babyname parser class that parses the popular names and their rank
 
 
 class BabynameFileNotFoundException(Exception):
-
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
+    """
+    A custom exception for the cases that the babyname file does not exist.
+    """
+    pass
 
 
 def check_filename_existence(func):
@@ -44,12 +42,13 @@ def check_filename_existence(func):
         BabynameFileNotFoundException: if there is no such file named as the first argument of the function to decorate.
     """
     # TODO: Implement this decorator
-
+    @wraps(func)
     def inner_function(self, dirname, year):
         try:
             return func(self, dirname, year)
-        except BabynameFileNotFoundException as e:
-            print(e)
+        except FileNotFoundError:
+            raise BabynameFileNotFoundException(
+                'No such file: ./{}/{}.html'.format(dirname, year))
 
     return inner_function
 
@@ -69,12 +68,6 @@ class BabynameParser:
         """
 
         # TODO: Open and read html file of the corresponding year, and assign the content to `text`.
-
-        filenames = os.listdir(dirname)
-        filename = '{}.html'.format(year)
-        if not filename in filenames:
-            raise BabynameFileNotFoundException(
-                'No such file: {}'.format(filename))
 
         f = open("./{}/{}.html".format(dirname, year), 'r', encoding='utf-8')
 

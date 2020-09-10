@@ -7,8 +7,10 @@ from functools import wraps
 
 
 class BabyFetchException(Exception):
-    def __init__(self):
-        print('Request Failed')
+    """
+    A custom exception for the cases where it fails to fetch the html file from the internet.
+    """
+    pass
 
 
 def safe_internet_fetch(func):
@@ -21,11 +23,12 @@ def safe_internet_fetch(func):
         BabyFetchException: if it fails to fetch the html codes from the url.
     """
     # TODO: Implement this decorator
+    @wraps(func)
     def inner_function(url, year):
         try:
             return func(url, year)
         except urllib.error.URLError:
-            raise BabyFetchException
+            raise BabyFetchException('Request Failed')
 
     return inner_function
 
@@ -49,12 +52,11 @@ def fetch_top_1000(url, year):
     # You must use standard library `urllib` to send request. (i.e. 3rd party libraries are not allowed.)
     # urllib reference link: https://docs.python.org/3/library/urllib.request.html#urllib.request.urlopen
 
-    data = urllib.parse.urlencode({'year': year, 'top': 1000})
-    data = data.encode('ascii')
+    data = urllib.parse.urlencode({'year': year, 'top': 1000}).encode('ascii')
     req = urllib.request.Request(url, data=data)
     res = urllib.request.urlopen(req)
-    result = res.read()
-    return result.decode('utf-8')
+    text = res.read().decode('utf-8')
+    return text
 
 
 def main():

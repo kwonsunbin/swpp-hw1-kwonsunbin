@@ -58,9 +58,10 @@ class BabyRecord:
         e.g. 2018,1,Joan,F,-2
         """
         # TODO: Implment this function
+
         csvLine = str(self.year) + ',' + str(self.rank) + \
             ',' + str(self.name) + ',' + str(self.gender) + \
-            ','+str(self.rank_change)
+            ',' + str('' if self.rank_change == None else self.rank_change)
         return csvLine
 
     def __repr__(self):
@@ -114,13 +115,13 @@ def main():
         # By using the lambda function, `parse` method should return a list of `BabyRecord` objects
         # that contain year, rank, name, and gender data.
         male_records = parser.parse(lambda year, rank, name: BabyRecord(
-            year, rank, name, "M", ""))  # Parse the male ranks and store them as a list of `BabyRecord` objects.
+            year, rank, name, "M", None))  # Parse the male ranks and store them as a list of `BabyRecord` objects.
         female_records = parser.parse(lambda year, rank, name: BabyRecord(
-            year, rank, name, "F", ""))  # Parse the female ranks and store it as a list of `BabyRecord` objects.
+            year, rank, name, "F", None))  # Parse the female ranks and store it as a list of `BabyRecord` objects.
 
         # TODO: Calculate the rank change for each of `male_records` and `female_records`.
         # For example, if the rank of the previous year is 8 and the rank of the current year is 5,
-        # -3 is the rank change. (Beware the sign of the value. Rank-up is respresented with a negative value!)
+        # -3 is the rank change. (re the sign of the value. Rank-up is respresented with a negative value!)
         # If the rank of previous year is not available, set `rank_change` to `None`.
         for record in male_records:
             if record.get_name() in prev_male_ranking.keys():
